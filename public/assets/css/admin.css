@@ -1,0 +1,92 @@
+:root {
+    --font-color: #837e7e;
+    --font-color-active: #6d6d6d;
+    --border-color: #d1d1d1;
+    --background-color-active: #d1d1d1;
+}
+
+.admin_wrap{
+    margin: 50px;
+}
+.admin_menu{
+    color: var(--font-color);
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+.admin_menu_item{
+    border: 1px solid var(--border-color);
+    padding: 20px 40px;
+    text-decoration: none;
+}
+.admin_menu_item a{
+    text-decoration: none;
+    color: var(--font-color);
+}
+.active{
+    background-color: var(--background-color-active);
+}
+.active a{
+    color: var(--font-color-active);
+}
+
+/* admin1.php */
+.onoff_wrap{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    padding: 30px 80px;
+    border: 1px solid var(--border-color);
+    margin-top: 20px;
+}
+.onoff_wrap_inner{
+    margin-left: 20px;
+}
+
+.participant_wrap {
+    margin-top: 20px;
+    padding: 30px 80px;
+    border: 1px solid var(--border-color);
+}
+.participant_list {
+    text-align: center;
+    border-collapse: collapse;
+}
+.participant_list_header {
+    background-color: var(--background-color-active);
+}
+.participant_list td{
+    padding: 5px 20px;
+}
+.add_participant_title{
+    margin-top: 20px;
+}
+
+
+/* admin2.php */
+.vote_wrap{
+    margin-top: 20px;
+    border: 1px solid var(--border-color);
+}
+.vote_list{
+    width: 100%;
+    text-align: center;
+    border-collapse: collapse;
+}
+.vote_list_header {
+    background-color: var(--background-color-active);
+}
+.vote_list td{
+    padding: 5px 20px;
+}
+
+/* admin3.php */
+.user_add_wrap{
+    margin-top: 20px;
+    padding: 30px 80px;
+    border: 1px solid var(--border-color);
+}
+.vote_reset_wrap{
+    margin-top: 500px;
+}
+
