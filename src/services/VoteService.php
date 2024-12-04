@@ -13,6 +13,11 @@ class VoteService
         $this->voteModel = new VoteModel();
     }
 
+    // 투표 초기화
+    public function resetVote() {
+        return $this->voteModel->deleteAll();
+    }
+
     // 투표 통계
     public function getVoteStatistics() {
         $votes = [];
@@ -39,8 +44,18 @@ class VoteService
         // 순위 계산
         $sortedVotes = $totalVotes;
         arsort($sortedVotes);
-        $ranks = array_flip(array_keys($sortedVotes));
+        $ranks = [];
+        $currentRank = 0;
+        $previousScore = null;
         
+        foreach ($sortedVotes as $participantId => $score) {
+            if ($previousScore === null || $score < $previousScore) {
+                $currentRank++;
+            }
+            $ranks[$participantId] = $currentRank;
+            $previousScore = $score;
+        }
+
         // 최종 결과 조합
         $result = [];
         foreach ($votes as $participantId => $voteData) {

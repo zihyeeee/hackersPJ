@@ -1,12 +1,27 @@
 <?php
-
 use src\services\ParticipantService;
 use src\services\VoteService;
+use src\services\OnOffService;
+
+if(!empty($_GET['test']) && $_GET['test'] == '1') {
+    $_SESSION['hackers2024_member_id'] = '999';
+    $_SESSION['hackers2024_member_cp'] = '01011111111';
+    $_SESSION['hackers2024_member_user_level'] = '1';
+}
 
 checkLogin();
 
 $participantService = new ParticipantService();
 $voteService = new VoteService();
+$onOffService = new OnOffService();
+
+// 투표 종료 체크
+$onOff = $onOffService->getOnOff();
+$onOffResult = $onOffService->checkOnOff($onOff);
+if($onOffResult['result'] == 'fail') {
+    echo '<script>alert("'.$onOffResult['message'].'");</script>';
+    exit;
+}
 
 // 참가자
 $participants = $participantService->getParticipantList();
@@ -69,9 +84,10 @@ $img_url = $config['hacademia_cdn_url'];
         // 목록에 투표한 트로피 배지 추가
         'trophyBadge': () => {
             $('#my_vote input').each(function(){
-                let html = '<span class="vote_trophy"><img src="<?=$img_url?>trophy'+$(this).data('vote_type')+'.png" alt=""></span>';
+                let html = '<img src="<?=$img_url?>trophy'+$(this).data('vote_type')+'.png" alt="">';
 
                 // 트로피 배지 추가
+                $('li[data-p_id="'+$(this).val()+'"] .vote_trophy').html('');
                 $('li[data-p_id="'+$(this).val()+'"] .vote_trophy').append(html);
                 $('li[data-p_id="'+$(this).val()+'"] .sum_wrap').addClass(voteType[$(this).data('vote_type')]);
                 $('li[data-p_id="'+$(this).val()+'"] .sum_wrap span:first-child').addClass(voteType[$(this).data('vote_type')]);
@@ -125,6 +141,7 @@ $img_url = $config['hacademia_cdn_url'];
         $('.vote_pop').fadeOut();
         uncheckVote();
         $('#selected_participant input[name="selected_p_id"]').val('');
+        $('.vote_wrap').css('display', 'block');
     }
 
     // 투표 완료 팝업 열기
@@ -169,9 +186,27 @@ $img_url = $config['hacademia_cdn_url'];
         $('.vote_confirm').fadeOut();
         uncheckVote();
         $('#selected_participant input[name="selected_p_id"]').val('');
+        $('.vote_wrap').css('display', 'block');
     }
 
     $(document).ready(function(){
+        //팀이름 글자 크기 조절
+        $('.name_wrap p:first-child').each(function(){
+            const teamName = $(this).text(); 
+            const teamNameLength = teamName.length; 
+
+            console.log(teamName);
+            console.log(teamNameLength);
+
+            if (teamNameLength > 10) {
+                $(this).css('font-size', '3.2vw'); 
+                $(this).css('height', '9vw');
+            } else {
+                $(this).css('font-size', '3.6vw');
+                $(this).css('height', '4vw');
+            }
+        });
+
         // 투표한 트로피 배지 숨김
         myVote.trophyBadgeList();
         myVote.trophyBadge();
@@ -193,16 +228,28 @@ $img_url = $config['hacademia_cdn_url'];
             const team_name = $(this).find('a.name_wrap p:first-child').text();
             const image_url = $(this).find('#img_'+p_id).attr('src');
 
+            $('.vote_wrap').css('display', 'none');
+            
+            // 투표 기회 체크
+            if(myVote.isAllVote()) {
+                alert('투표 기회가 모두 소진되었습니다.');
+                $('.vote_wrap').css('display', 'block');
+                return;
+            }
+
+            // 이미 투표한 참가자 체크
+            const votedPIdArr = myVote.getPId();
+            if(votedPIdArr.includes(p_id.toString())) {
+                alert('이미 투표가 완료된 참가자입니다.');
+                $('.vote_wrap').css('display', 'block');
+                return;
+            }
+            
             // 선택한 참가자 정보 설정
             $('#selected_participant input[name="selected_p_id"]').val(p_id);
 
             // 투표 팝업 트로피 배지 표시
             myVote.trophyBadgePop();
-
-            // 전체 투표 시 버튼 숨김
-            if(myVote.isAllVote()) {
-                $('.vote_pop .vote_bott button').css('display', 'none');
-            }
 
             // 투표 팝업 표시
             $('.vote_pop .vote_middle img').attr('src', image_url);
@@ -247,18 +294,18 @@ $img_url = $config['hacademia_cdn_url'];
     .mark_bg_wrap{position:absolute; top:0; left:0; width: 100%; height:100%; z-index: 9;}
     .mark_bg_wrap .mark_bg{background:rgba(0,0,0,0.6); width: 100%; height: 100%; position:fixed;}
     .mark_bg_wrap img{position:absolute; top:0; left:50%; transform:translatex(-50%); width: 90%; margin:0 auto;}
-    .mark{display:block; width:9.9vw; height:11vw; position:fixed; bottom:5%; right:12%; z-index: 10; background:url("<?=$img_url?>mark_btn.png") no-repeat 100% 0;}
-    .mark.off{background:url("<?=$img_url?>mark_btn.png") no-repeat 0; width:9.9vw; height:11vw;}
+    .mark{display:block; width:9.9vw; height:11vw; position:fixed; bottom:3%; right:6%; z-index: 10; background:url("<?=$img_url?>mark_btn.png") no-repeat 100% 0;}
+    .mark.off{background:url("<?=$img_url?>mark_btn.png") no-repeat 0; width:9.9vw; height:11vw; z-index: 5;}
     .vote_wrap{display:none;}
     .vote_wrap .top_wrap{width: 90%; margin:0 auto;}
-    .vote_wrap .trophy{width: 30%; position:absolute; top:0; left:57.8%;}
-    .vote_wrap .trophy img{width: 22.6%; background:#f6f8fa; margin-right:3.42vw;}
+    .vote_wrap .trophy{width: 32%; position:absolute; top:-0.4vw; left:57.8%;}
+    .vote_wrap .trophy img{width: 23.2%; background:#f6f8fa; margin-right:2.8vw;}
     .vote_wrap .trophy img.trophy_off{display:none;}
     .vote_wrap .trophy img:last-child{margin-right:0;}
 
     .cont_wrap{background:#fff; width: 90%; height:auto; margin:-0.5vw auto 0; padding: 4vw 0 9vw;}
     .cont_wrap ul{width: 90%; margin:0 auto; text-align:center;}
-    .cont_wrap ul li{width: 48%; display:inline-block;}
+    .cont_wrap ul li{width: 48%; display:inline-block; vertical-align:top;}
     .cont_wrap ul li:nth-child(odd){margin-right: 2vw;}
     .cont_wrap ul li a{display:block;}
 
@@ -266,13 +313,13 @@ $img_url = $config['hacademia_cdn_url'];
     .cont_wrap ul li a.sum_wrap .vote_trophy{position:absolute; bottom:10%; right:10%; width: 6vw; height:11.6vw;}
     .cont_wrap ul li a.name_wrap{padding:2vw 0 6vw;}
     .cont_wrap ul li a img{}
-    .cont_wrap ul li a p{font-size:3.2vw; color:#7b818f;}
-    .cont_wrap ul li a p:first-child{font-size:3.6vw; font-weight:900; color:#222;}
+    .cont_wrap ul li a p{font-size:3vw; color:#7b818f;}
+    .cont_wrap ul li a p:first-child{font-size: 3.6vw; font-weight:900; color:#222; height:5vw;}
 
     /* vote_pop */
-    .vote_pop{display:none; position:absolute; top:0; left:0; width: 100%; height:100%;}
+    .vote_pop{display:none; position:absolute; top:0; left:0; width: 100%; height:100%; z-index: 7;}
     .pop_bg{position:fixed; top:0; left:0; width: 100%; height:100%;background:rgba(0,0,0,0.6);}
-    .vote_con{width: 90%; height:162vw; background:#fff; position:absolute; top:3%; left:50%; transform:translatex(-50%);}
+    .vote_con{width: 90%; height:164vw; background:#fff; position:absolute; top:4vw; left:50%; transform:translatex(-50%);}
 
     .vote_con .vote_top{border-bottom:0.4vw solid #111; font-size:4vw; letter-spacing: -0.08em; display: flex; justify-content: space-between;     margin: 2vw 5vw 8vw; padding: 3vw 0; font-weight:700;}
     .vote_con .vote_top span{}
@@ -282,8 +329,7 @@ $img_url = $config['hacademia_cdn_url'];
 
     .vote_con .vote_middle{width: 66%; margin: 0 auto;}
     .vote_con .vote_middle > div{background:#efefef; border-radius:3vw; overflow:hidden;}
-    .vote_con .vote_middle div img{}
-    .vote_con .vote_middle p{font-size:3.4vw; font-weight:700; text-align:center; padding: 3vw 0 6vw;}
+    .vote_con .vote_middle p{font-size:3.4vw; font-weight:700; text-align:center; padding: 2.6vw 0 4vw;}
 
     .vote_con .vote_bott{margin-top:2vw;}
     .vote_con .vote_bott input{display: none;}
@@ -295,7 +341,7 @@ $img_url = $config['hacademia_cdn_url'];
     .vote_con .vote_bott input[type="radio"]{border:5px solid red;}
     .vote_con .vote_bott input[type="radio"]:checked+label{background-position-x:100%;}
 
-    .vote_btn{color:#fff; background: linear-gradient(-90deg, #EE7752, #E73C7E, #23A6D5, #23D5AB, #EE7752); background-size: 400% 100%; font-size:4vw;text-transform: uppercase;  animation: Gradient 4s ease infinite; font-weight:700; border:none; height:15vw; line-height:15vw; width: 100%; display: block; margin:4.4vw 0 0;}
+    .vote_btn{color:#fff; background: linear-gradient(-90deg, #EE7752, #E73C7E, #23A6D5, #23D5AB, #EE7752); background-size: 400% 100%; font-size:4vw;text-transform: uppercase;  animation: Gradient 4s ease infinite; font-weight:700; border:none; height:15vw; line-height:15vw; width: 100%; display: block; position:absolute; bottom:0; left:0;}
     .vote_con .vote_bott .vote_btn div{position: relative; z-index: 5;}
     .vote_con .vote_bott button:after{content: ''; position: absolute; background-size: inherit; background-image: inherit; animation: inherit; left: 0px; right: 0px; top: 2px; height: 100%; filter: blur(1rem);}
 
@@ -307,6 +353,7 @@ $img_url = $config['hacademia_cdn_url'];
     }
 
     /* alert_wrap */
+    .alert_wrap{z-index: 8;}
     .alert_wrap,.alert_wrap2{display:none; position:fixed; top:0; left:0; width: 100%; height:100%;}
     .alert_info{width: 90%; background:#fff; position:absolute; top:35%; left:50%; transform:translatex(-50%); text-align: center; padding:8vw 0 0; font-weight:700; letter-spacing: -0.08rem;}
     .alert_wrap .alert_info p.alert_tit{font-size:4vw; margin-bottom: 5vw;}
@@ -314,21 +361,23 @@ $img_url = $config['hacademia_cdn_url'];
     .alert_wrap .alert_info ul{width: 100%; display:flex; justify-content: space-between; height:12vw; line-height:12vw;}
     .alert_wrap .alert_info ul li{width: 50%; font-size:4vw; color:#fff;}
     .alert_wrap .alert_info ul li:first-child{background:#444444;}
-    .alert_wrap .alert_info ul li .vote_btn{height:12vw; line-height:12vw; margin:0;}
+    .alert_wrap .alert_info ul li .vote_btn{height:12vw; line-height:12vw; margin:0; position: relative;}
 
     /* alert_wrap2 */
     .alert_wrap2 .alert_info .alert_tit{font-size:3.6vw; font-weight:500; padding:0 2vw 4vw;}
 
     /* vote_confirm */
-    .vote_confirm{display:none; position:absolute; top:0; left:0; width: 100%; height:100%;}
+    .vote_confirm{display:none; position:absolute; top:0; left:0; width: 100%; height:100%; z-index: 7;}
     .vote_confirm .vote_con .vote_top{margin: 2vw 5vw 0;}
     .vote_confirm .vote_con .vote_middle{width: 100%;}
     .vote_confirm .vote_con .vote_middle .team_wrap{position:absolute; top:14.4%; left:50%; transform:translatex(-50%); width: 80%; background:transparent; }
-    .vote_confirm .vote_con .vote_middle .team_wrap p{margin-bottom:3vw; color:#444; letter-spacing: -0.08rem;}
+    .vote_confirm .vote_con .vote_middle .team_wrap p{margin-bottom:5.8vw; color:#444; letter-spacing: -0.08rem;}
     .vote_confirm .vote_con .vote_middle .team_wrap .sum_wrap{width: 57%; margin:6vw auto 0;}
     .vote_confirm .vote_middle .team_trohpy{position:absolute; top:51.4%; left:65.6%; display:block; width: 15.6%;}
     .vote_confirm .vote_con .vote_btn{margin:10.4vw 0 0;}
 
+    /* 관리자 버튼 */
+    .admin_btn_wrap button{width: 12vw; height:4vw; margin-bottom:2vw;}
 </style>
 
 <body>
@@ -361,6 +410,12 @@ $img_url = $config['hacademia_cdn_url'];
             </div>
     
             <div class="cont_wrap">
+                <?php if($_SESSION['hackers2024_member_user_level'] == '2') { ?>
+                    <div class="admin_btn_wrap">
+                        <button class="admin_btn" onclick="location.href='/admin';">관리자</button>
+                    </div>
+                <?php } ?>
+
                 <ul>
                     <?php if(!empty($participants)) { 
                         $cnt = 0;

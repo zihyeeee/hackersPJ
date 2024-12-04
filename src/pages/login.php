@@ -85,6 +85,7 @@ $img_url= $config['hacademia_cdn_url'];
     .e_wrap .user_chk .phone_num .submit_btn{color:#fff; background: linear-gradient(-90deg, #EE7752, #E73C7E, #23A6D5, #23D5AB, #EE7752); background-size: 400% 100%; font-size:4vw;text-transform: uppercase;  animation: Gradient 4s ease infinite; font-weight:700; border:none; border-radius:2vw; height:15vw; line-height:15vw; width: 100%; display: block; margin:4vw auto 0;}
     .e_wrap .user_chk .phone_num .submit_btn div{position: relative; z-index: 5;}
     .e_wrap .user_chk .phone_num .submit_btn::after {content: ''; position: absolute; background-size: inherit; background-image: inherit; animation: inherit; left: 0px; right: 0px; top: 2px; height: 100%; filter: blur(1rem);}
+    .phone_num input::placeholder{color:#cecece;}
 
     @keyframes Gradient {
         50% {

@@ -95,7 +95,6 @@ switch($action){
 
     case 'login' :
         $user_mobile = $_POST['user_mobile'];
-        $onOff = $_POST['onoff'];
 
         $memberService = new MemberService();
         $onOffService = new OnOffService();
@@ -124,6 +123,14 @@ switch($action){
         $p_id = $_POST['p_id'];
         $vote_type = $_POST['vote_type'];
 
+        // 투표 종료 체크
+        $onOffService = new OnOffService();
+        $onOffResult = $onOffService->checkOnOff($onOffService->getOnOff());
+        if($onOffResult['result'] == 'fail') {
+            echo jsonEncode($onOffResult);
+            exit;
+        }
+
         $voteService = new VoteService();
         $voteResult = $voteService->vote([
             'member_id' => $member_id,
@@ -138,6 +145,25 @@ switch($action){
         }
         exit;
 
-    break;
+    case 'add_user' :
+        $memberService = new MemberService();
+        $user_mobile = $_POST['user_mobile'];
+        $user_level = $_POST['user_level'];
+        $result = $memberService->addUser([
+            'user_mobile' => $user_mobile, 
+            'user_level' => $user_level
+        ]);
+        echo jsonEncode($result);
+        exit;
+
+    case 'vote_reset' :
+        $voteService = new VoteService();
+        $result = $voteService->resetVote();
+        if($result['success']){
+            echo jsonEncode(['result' => 'success', 'message' => '투표 초기화가 완료되었습니다.']);
+        }else{
+            echo jsonEncode(['result' => 'fail', 'message' => '오류가 발생했습니다.']);
+        }
+        exit;
 }
 ?>

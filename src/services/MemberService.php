@@ -32,4 +32,31 @@ class MemberService
             return ['result' => 'fail', 'message' => '일치하는 휴대폰 번호가 없습니다.'];
         }
     }
+
+    // 유저 추가
+    public function addUser($params) {
+        $user_mobile = $params['user_mobile'];
+        $user_level = $params['user_level'];
+
+        if(!validate_data(['user_mobile' => $user_mobile, 'user_level' => $user_level])){
+            return ['result' => 'fail', 'message' => '필수 입력 항목을 확인해주세요.'];
+        }
+
+        $exists = $this->memberModel->selectMemberByCp($user_mobile);
+        if(!empty($exists['id'])){
+            return ['result' => 'fail', 'message' => '이미 존재하는 회원입니다.'];
+        }
+
+        $result = $this->memberModel->insertData([
+            'hid' => '수동', 
+            'cp' => $user_mobile, 
+            'user_level' => $user_level
+        ]);
+
+        if($result['success']){
+            return ['result' => 'success', 'message' => '회원 등록이 완료되었습니다.'];
+        }else{
+            return ['result' => 'fail', 'message' => '오류가 발생했습니다.'];
+        }
+    }
 }

@@ -29,4 +29,10 @@ class VoteModel extends BaseModel
         $this->db->stmt_bind_param("iii", [$data['member_id'], $data['p_id'], $data['vote_type']]);
         return $this->db->stmt_execute('insert');
     }
+
+    public function deleteAll() {
+        $qry = "DELETE FROM event_hackers_vote";
+        $this->db->prepare($qry);
+        return $this->db->stmt_execute('delete');
+    }
 }

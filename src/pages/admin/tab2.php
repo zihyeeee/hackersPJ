@@ -33,7 +33,7 @@ $voteStatistics = $voteService->getVoteStatistics();
                     $vote_type_2 = $voteStatistics[$participantId]['vote_type_2'];
                     $vote_type_3 = $voteStatistics[$participantId]['vote_type_3'];
                     $total = $voteStatistics[$participantId]['total'];
-                    $rank = $voteStatistics[$participantId]['rank'] + 1;
+                    $rank = $voteStatistics[$participantId]['rank'];
                 } ?>
                 <tr>
                     <td><?=$participantId?></td>

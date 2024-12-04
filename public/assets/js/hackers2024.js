@@ -27,6 +27,7 @@ function ajax_request(data){
                 alert(response.message);
             }
 
+            // 성공 시 액션별 처리
             if(response.result == 'success'){
                 switch(action){
                     case 'login':
@@ -47,6 +48,15 @@ function ajax_request(data){
                         break;
 
                     default:
+                        location.reload();
+                        break;
+                }
+            }
+
+            // 실패 시 액션별 처리
+            if(response.result == 'fail'){
+                switch(action){
+                    case 'vote':
                         location.reload();
                         break;
                 }
@@ -187,4 +197,33 @@ function validate_participant(data){
         }
     }
     return true;
+}
+
+// 유저 추가
+function add_user(){
+    const formData = new FormData();
+    formData.append('action', 'add_user');
+    formData.append('user_mobile', $('[name=user_mobile]').val());
+    formData.append('user_level', $('[name=user_level]:checked').val());
+
+    ajax_request(formData);
+}
+
+// 투표 초기화
+function vote_reset(){
+    let confirmCount = 10; // 필요 횟수
+    let count = 0;
+
+    for(let i = 0; i < confirmCount; i++){
+        if(confirm('투표 초기화를 진행하시겠습니까? 내용은 복구되지 않습니다. ' + (confirmCount - count))){
+            count += 1;
+        } else {
+            return;
+        }
+    }
+
+    const formData = new FormData();
+    formData.append('action', 'vote_reset');
+
+    ajax_request(formData);
 }

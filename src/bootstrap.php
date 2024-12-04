@@ -4,9 +4,6 @@ ini_set("display_errors", 1);
 
 session_start();
 
-use src\core\DB;
-use src\core\DBConnection;
-
 // 기본 경로
 define('BASE_PATH', dirname(__DIR__));
 define('ASSETS_PATH', BASE_PATH . '/assets');

@@ -14,4 +14,13 @@ class MemberModel extends BaseModel
 
         return $result;
     }
+
+    public function insertData($params) {
+        $qry = "INSERT INTO event_hackers_member (hid, cp, user_level) VALUES (?, ?, ?)";
+        $this->db->prepare($qry);
+        $this->db->stmt_bind_param("ssi", [$params['hid'], $params['cp'], $params['user_level']]);
+        $result = $this->db->stmt_execute('insert');
+
+        return $result;
+    }
 }
